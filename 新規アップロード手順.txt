@@ -1,0 +1,29 @@
+AkiSpot r9.1｜GitHubへの新規アップロード
+
+現状：このZIPはGitHubへまだアップロードされていません。
+既存の「Blank-Baby」リポジトリは変更していません。
+
+【Windowsからまとめて作成する方法】
+1. Git for Windows と GitHub CLI (gh) をインストールする。
+   Git: https://git-scm.com/download/win
+   GitHub CLI: https://cli.github.com/
+2. PowerShellを開き `gh auth login` で、GitHubアカウント orizin075-stack にログインする。
+3. このZIPを「すべて展開」する。ZIPのまま実行しないこと。
+4. 展開フォルダー内の UPLOAD_NEW_GITHUB.ps1 をPowerShellで実行する。
+   例： PowerShellのウィンドウにスクリプトをドラッグする、またはフォルダー内で
+        powershell -ExecutionPolicy Bypass -File .\UPLOAD_NEW_GITHUB.ps1
+5. 正常なら GitHub上に AkiSpot-survey が新規作成され、ファイルがpushされる。
+6. 公開サイトが開けても、config.js の送信先は空欄です。先にGoogle Apps Scriptを設定し、SETUP.mdに従って更新する。
+
+【GitHubブラウザから手動でアップロードする方法】
+1. https://github.com/new で新規 public リポジトリ AkiSpot-survey を作成する。
+2. Add file > Upload files からZIPの中身を展開して各ファイルをアップロードする。
+   ZIPファイル自体を入れるだけではGitHub Pagesは動きません。
+3. Settings > Pages > Deploy from a branch > main / (root) を選択する。
+4. Google Apps Scriptの設定とconfig.jsの更新はSETUP.mdを参照。
+
+【情報管理】
+・個々の回答・秘密鍵・パスワード・スプレッドシートIDはGitHubに置かない。
+・Google側の回答用スプレッドシートは「制限付き」共有のままにする。
+・公開版は誰でもアクセスできるため、回答URLは実送信テスト後に配布する。
+・GitHub CLIでのリポジトリ作成、GitHub Pages有効化、Google Apps Scriptへの実送信は未実行・未検証です。
