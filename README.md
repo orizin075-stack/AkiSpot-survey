@@ -1,0 +1,78 @@
+# AkiSpot｜荷物と空きスペースに関するアンケート（r9）
+
+大学演習で検討中の個人間収納マッチングサービス **AkiSpot** に関する市場調査システムです。実際の保管契約・決済・補償は提供しません。
+
+## システム構成
+
+```text
+回答者（PC・タブレット・スマホ）
+       ↓
+GitHub Pages（index.html / config.js）
+       ↓  回答確定時のみ HTTPSの通常フォームPOST
+Google Apps Script（backend/Code.gs の doPost）
+       ↓  必須回答チェック・回答IDの重複防止
+非公開 Googleスプレッドシート
+       ├── ダッシュボード
+       ├── 回答
+       ├── 集計
+       ├── 設問定義
+       └── 管理・注意
+```
+
+**公開されるのは回答用ページです。** スプレッドシート、個々の回答、管理画面はGitHubに置かず、Googleドライブで非公開に管理します。
+
+## 最初のセットアップ（必須）
+
+1. [SETUP.md](SETUP.md) の手順で、Google Apps Scriptに `backend/Code.gs` と `backend/Index.html` を登録し、`setup_()` を実行して回答先のスプレッドシートを作ります。
+2. Google Apps ScriptをWebアプリとしてデプロイし、**実行ユーザー：自分**、**アクセスできるユーザー：全員（匿名アクセス可）** を選びます。大学・組織アカウントでは設定が制限される場合があります。
+3. 発行された `https://script.google.com/macros/s/.../exec` URLを、リポジトリ直下の `config.js` の `AKISPOT_SUBMISSION_URL` に貼り付けます（URLそのものは秘密情報ではありません）。
+4. **AkiSpot専用の独立したGitHubリポジトリ** を作り、このディレクトリ一式をアップロードします。既存の他プロジェクトに混ぜないでください。
+5. GitHub リポジトリの `Settings → Pages → Source → Deploy from a branch` で `main` / `(root)` を選んで保存します。
+6. GitHub PagesのURLで試験回答を1件送信し、**Googleの受付完了画面に受付番号が出ること**、スプレッドシートの「回答」に1行保存されること、ダッシュボードが更新されることを確認してから配布します。
+
+**`config.js` が空欄のままでも表示・操作はできますが、回答送信はできません。公開準備中の警告が表示されます。**
+
+## ファイル構成
+
+| ファイル | 用途 |
+|---|---|
+| `index.html` | GitHub Pages向け回答ページ |
+| `config.js` | 公開先Apps Script `/exec` URLの指定。秘密情報は書かない |
+| `backend/Code.gs` | 回答保存・検証・集計・`doPost()`受付 |
+| `backend/Index.html` | Apps Script単独でも公開できるバックアップ回答ページ |
+| `backend/appsscript.json` | Apps Script用の設定例（必須ではない） |
+| `.nojekyll` | GitHub Pages の静的配信を指定 |
+| `.github/workflows/check.yml` | GitHub Actionsで基本テスト |
+| `tests/` | ローカル・自動テスト |
+| `SETUP.md` | 操作手順・安全確認 |
+| `TEST_REPORT.md` | テスト済み・未検証範囲 |
+
+## 開発・テスト
+
+追加ライブラリ不要のチェック：
+
+```bash
+node tests/source.test.js
+node tests/server.test.js
+```
+
+オプションのブラウザ試験（Python Playwright・Chromiumが必要）：
+
+```bash
+python tests/browser.test.py
+```
+
+## 回答の扱い
+
+- 氏名・メールアドレス・正確な住所は質問しません。自由記述にも記入しないよう案内しています。
+- 送信前の回答は利用端末の `localStorage` に保存される場合があります。送信後はApps ScriptからGoogleスプレッドシートに保存されます。
+- 受付番号とランダムな回答IDを利用します。**同じ回答IDの再送信**は重複登録しませんが、異なる端末・新しい回答IDでの二重回答は完全には防げません。
+- 表示料金は仮の検証条件（借り手：保管料7,000円＋利用料1,260円＝月8,260円、送料別。貸し手：月7,000円受取、実費別）です。
+- 回答者の割合は標本内の自己申告。実際の成約数・事業採算・京都府全域の人口推計と同一視しないでください。
+- このシステムにはログインやCAPTCHAはなく、インターネット公開後の自動投稿は完全には防げません。回答の異常値・大量投稿を確認してください。
+
+## 状態
+
+**コードと模擬試験が完了したリリース候補です。** GitHub Pagesの公開、Apps Scriptの実デプロイ、実際のGoogleスプレッドシートへの書き込みは、オーナーアカウントでの初期設定と実地確認が必要です。公開されるまでURLはありません。
+
+Windowsで新規・空のGitHubリポジトリに一括アップロードする場合は、PowerShellから `PUSH_TO_GITHUB.ps1 -RepositoryUrl 'https://github.com/ユーザー名/AkiSpot-survey'` を使用できます。Git for WindowsのセットアップとGitHub認証が必要です。既存リポジトリを強制上書きする処理はありません。
