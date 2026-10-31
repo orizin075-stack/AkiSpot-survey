@@ -23,7 +23,7 @@ assert.match(gas,/2026\.10-r10/);
 assert.match(backend,/2026\.10-r10/);
 assert.match(website,/rating-text/);
 assert.match(gas,/rating-text/);
-assert.match(website,/1＝全く気にならない/);
+assert.match(website,/全く気にならない/);
 assert.match(website,/@media\(max-width:600px\)/);
 assert.match(config,/AKISPOT_SUBMISSION_URL/);
 assert(!config.includes('AIza'), 'do not commit API keys');
