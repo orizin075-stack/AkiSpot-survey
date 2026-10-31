@@ -11,7 +11,8 @@ JS=r'''(role) => {
   const id=x.textContent;out.seen.push(id);
   if(document.documentElement.scrollWidth>innerWidth+2)out.overflows.push(id);
   if(id==='Q9'||id==='Q17'||id==='Q16'){
-   const labels=[...document.querySelectorAll('#main .rating-text')].map(x=>x.textContent);
+   if(document.querySelectorAll('#main .rating-unknown').length!==(id==='Q16'?1:4))out.errors.push(id+': missing undecided choice');
+   const labels=[...document.querySelectorAll('#main .rating:not(.rating-unknown) .rating-text')].map(x=>x.textContent);
    const expected=id==='Q16'?['全く関心がない','あまり関心がない','どちらともいえない','やや関心がある','非常に関心がある']:['全く気にならない','あまり気にならない','どちらともいえない','やや気になる','非常に気になる'];
    if(labels.length!==(id==='Q16'?5:20)||labels.some((x,i)=>x!==expected[i%5]))out.errors.push(id+': rating labels do not match');
   }
@@ -66,7 +67,7 @@ with sync_playwright() as p:
  page.get_by_role('button',name='回答を送信する').click()
  data=page.evaluate('window.__posted')
  assert data and data['url'].endswith('/FAKE_DEPLOY_ID_12345/exec'),data
- assert data['method']=='post' and data['payload']['version']=='2026.10-r9'
+ assert data['method']=='post' and data['payload']['version']=='2026.10-r10'
  assert data['payload']['answers']['Q4']=='どちらも当てはまらない'
  assert 'Q25' in data['payload']['answers'] and not errs
  print('BROWSER PASS:',n,'viewport/route cases plus connected POST contract')
