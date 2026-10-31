@@ -84,3 +84,17 @@ const missing=doPost({parameter:{payload:'not JSON'}});
 assert(missing.html.includes('回答を保存できませんでした'));
 assert(!missing.html.includes('not JSON'),'No user payload echoed');
 console.log('POST PASS: saved receipt, retry dedup, malformed input masked');
+
+// r10: "判断できない" (0) must be accepted, stored as 0 (not empty), and excluded from averages.
+const unknown=sample(2);
+unknown.Q9={0:0,1:0,2:0,3:0};unknown.Q17={0:0,1:0,2:0,3:0};unknown.Q16=0;
+const unknownReply=submit({version:'2026.10-r10',requestId:'uncertain-rating-12345678901',answers:unknown});
+assert.equal(unknownReply.ok,true);
+const columns=vm.runInContext('META_COLUMNS',ctx),answersSheet=last.getSheetByName('回答'),rowNum=answersSheet.getLastRow();
+for(const col of ['Q9_1','Q9_2','Q9_3','Q9_4','Q16','Q17_1','Q17_2','Q17_3','Q17_4']){
+ assert.equal(answersSheet.getRange(rowNum,columns.indexOf(col)+1).getValue(),0,'The unknown response must be saved as zero: '+col);
+}
+const aggregate=last.getSheetByName('集計').getDataRange().getValues().flat().map(String);
+assert(aggregate.some(x=>x.includes('AVERAGEIF(')&&x.includes('>0')),'unknown values must be excluded from average');
+console.log('UNKNOWN PASS: 0 preserved in all rating fields, averages exclude 0');
+
