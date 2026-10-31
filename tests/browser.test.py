@@ -10,6 +10,11 @@ JS=r'''(role) => {
   const x=document.querySelector('.question-number'); if(!x){out.errors.push('missing Q '+step); break;}
   const id=x.textContent;out.seen.push(id);
   if(document.documentElement.scrollWidth>innerWidth+2)out.overflows.push(id);
+  if(id==='Q9'||id==='Q17'||id==='Q16'){
+   const labels=[...document.querySelectorAll('#main .rating-text')].map(x=>x.textContent);
+   const expected=id==='Q16'?['全く関心がない','あまり関心がない','どちらともいえない','やや関心がある','非常に関心がある']:['全く気にならない','あまり気にならない','どちらともいえない','やや気になる','非常に気になる'];
+   if(labels.length!==(id==='Q16'?5:20)||labels.some((x,i)=>x!==expected[i%5]))out.errors.push(id+': rating labels do not match');
+  }
   const main=document.querySelector('#main');
   const radios=[...main.querySelectorAll('input[type="radio"]')];
   const checks=[...main.querySelectorAll('input[type="checkbox"]')];
