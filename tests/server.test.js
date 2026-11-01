@@ -41,38 +41,40 @@ const ctx={SpreadsheetApp,PropertiesService,LockService,Utilities,HtmlService,co
 const setup=vm.runInContext('setup_',ctx),submit=vm.runInContext('submitSurvey',ctx),build=vm.runInContext('buildFlags_',ctx),schema=vm.runInContext('QUESTION_SCHEMA',ctx);
 const url1=setup(); assert.equal(last.sheets.length,5); assert.equal(last.getSheetByName('ダッシュボード').getCharts().length,2);
 const url2=setup();assert.equal(url1,url2);assert.equal(last.sheets.length,5);
-function sample(role){let a={};const all=schemas.questions;const keys=[...schemas.common,...(role===0||role===2?schemas.borrow.filter(q=>q!=='Q8'):[]),...(role===1||role===2?schemas.lend:[]),...schemas.final];for(const id of keys){let q=all[id];if(id==='Q4'){a[id]=q.choices[role];continue}if(q.optional)continue;if(q.type==='single'){a[id]=q.choices[0]}else if(q.type==='multi'){a[id]={list:[q.choices[0]]}}else if(q.type==='matrix'){a[id]=Object.fromEntries(q.rows.map((_,i)=>[i,3]))}else if(q.type==='rating'){a[id]=3}else if(q.type==='text'){a[id]=''}else throw Error('unhandled '+id)}return a}
+const activeIds=vm.runInContext('activeIds_',ctx);
+function trim(a){const ids=new Set(activeIds(a));return Object.fromEntries(Object.entries(a).filter(([id])=>ids.has(id)))}
+function sample(role){let a={};const all=schemas.questions;const keys=[...schemas.common,...(role===0||role===2?schemas.borrow:[]),...(role===1||role===2?schemas.lend:[]),...schemas.final];for(const id of keys){let q=all[id];if(id==='Q4'){a[id]=q.choices[role];continue}if(q.optional)continue;if(q.type==='single'){a[id]=q.choices[0]}else if(q.type==='multi'){a[id]={list:[q.choices[0]]}}else if(q.type==='matrix'){a[id]=Object.fromEntries(q.rows.map((_,i)=>[i,3]))}else if(q.type==='rating'){a[id]=3}else if(q.type==='text'){a[id]=''}else throw Error('unhandled '+id)}return trim(a)}
 for(let ri=0;ri<4;ri++){
- const a=sample(ri);const id=`unique-request-${'ABCDE'[ri]}123456789012345678`;const p={version:'2026.10-r10',requestId:id,answers:a};
+ const a=sample(ri);const id=`unique-request-${'ABCDE'[ri]}123456789012345678`;const p={version:'2026.11-r11',requestId:id,answers:a};
  let res=submit(p);assert.equal(res.ok,true);assert.equal(res.duplicate,false);
  res=submit(p);assert.equal(res.ok,true);assert.equal(res.duplicate,true);
 }
 assert.equal(last.getSheetByName('回答').getLastRow(),5);
 assert.equal(last.getSheetByName('回答').getLastColumn(),vm.runInContext('META_COLUMNS.length',ctx));
-assert(last.getSheetByName('回答').getMaxColumns()>=61);
+assert(last.getSheetByName('回答').getMaxColumns()>=66);
 assert.equal(last.getSheetByName('回答').getRange(2,1,4,1).getValues().length,4);
-assert.equal(vm.runInContext('RESPONSE_COLUMNS.length',ctx),45);
+assert.equal(vm.runInContext('RESPONSE_COLUMNS.length',ctx),47);
 const base=sample(0), roleL=sample(1);
 // Invalid schema responses
 let rejected=0;function shouldReject(payload){try{submit(payload)}catch(e){rejected++;return}throw Error('expected rejection')}
-shouldReject({version:'2026.10-r10',requestId:'id-invalid-ABCD-123456',answers:{Q4:'invalid'}});
+shouldReject({version:'2026.11-r11',requestId:'id-invalid-ABCD-123456',answers:{Q4:'invalid'}});
 const big=sample(0);big.Q10={list:schemas.questions.Q10.choices.slice(0,4)};
-shouldReject({version:'2026.10-r10',requestId:'bad-multi-ABCD-12345678',answers:big});
+shouldReject({version:'2026.11-r11',requestId:'bad-multi-ABCD-12345678',answers:big});
 const bad=sample(0); delete bad.Q25;
-shouldReject({version:'2026.10-r10',requestId:'bad-missing-ABCD-12345678',answers:bad});
+shouldReject({version:'2026.11-r11',requestId:'bad-missing-ABCD-12345678',answers:bad});
 const bad2=sample(1);bad2.Q8={list:['その他'],other:'wrong route'};
-shouldReject({version:'2026.10-r10',requestId:'bad-route-ABCD-12345678',answers:bad2});
+shouldReject({version:'2026.11-r11',requestId:'bad-route-ABCD-12345678',answers:bad2});
 const bad3=sample(0);bad3.Q9={0:2,1:3};
-shouldReject({version:'2026.10-r10',requestId:'bad-matrix-ABCD-12345678',answers:bad3});
-const good=sample(0);good.Q7='検討したが利用しなかった';good.Q8={list:['料金が高かった']};const r=submit({version:'2026.10-r10',requestId:'good-branch-ABCD-12345678',answers:good});assert.equal(r.ok,true);
+shouldReject({version:'2026.11-r11',requestId:'bad-matrix-ABCD-12345678',answers:bad3});
+const good=sample(0);good.Q7='検討したが利用しなかった';good.Q8={list:['料金が高かった']};const r=submit({version:'2026.11-r11',requestId:'good-branch-ABCD-12345678',answers:good});assert.equal(r.ok,true);
 assert.equal(last.getSheetByName('回答').getLastRow(),6);
 setup();assert.equal(last.getSheetByName('回答').getLastRow(),6,'setup must not delete existing answers');
 assert.equal(last.getSheetByName('ダッシュボード').getCharts().length,2);
-console.log('SERVER PASS: setup repeated twice, answered 4 routes, dedup 4, invalid 5, Q8 branch, re-setup, dashboards and 39-column schema; rejected=',rejected);
+console.log('SERVER PASS: setup repeated twice, answered 4 routes, dedup 4, invalid 5, Q8 branch, re-setup, dashboards and 47-column schema; rejected=',rejected);
 
 // Public POST endpoint and receipt UI checks; no user-submitted HTML reflected.
 const doPost=vm.runInContext('doPost',ctx);
-const goodPost={version:'2026.10-r10',requestId:'post-route-unique-123456789',answers:sample(3)};
+const goodPost={version:'2026.11-r11',requestId:'post-route-unique-123456789',answers:sample(3)};
 const postReceipt=doPost({parameter:{payload:JSON.stringify(goodPost)}});
 assert(postReceipt.html.includes('回答を受け付けました'));
 assert(postReceipt.html.includes('受付番号'));
@@ -87,14 +89,30 @@ console.log('POST PASS: saved receipt, retry dedup, malformed input masked');
 
 // r10: "判断できない" (0) must be accepted, stored as 0 (not empty), and excluded from averages.
 const unknown=sample(2);
-unknown.Q9={0:0,1:0,2:0,3:0};unknown.Q17={0:0,1:0,2:0,3:0};unknown.Q16=0;
-const unknownReply=submit({version:'2026.10-r10',requestId:'uncertain-rating-12345678901',answers:unknown});
+unknown.Q9={0:0,1:0,2:0,3:0,4:0};unknown.Q17={0:0,1:0,2:0,3:0,4:0};unknown.Q16=0;
+const unknownReply=submit({version:'2026.11-r11',requestId:'uncertain-rating-12345678901',answers:trim(unknown)});
 assert.equal(unknownReply.ok,true);
 const columns=vm.runInContext('META_COLUMNS',ctx),answersSheet=last.getSheetByName('回答'),rowNum=answersSheet.getLastRow();
-for(const col of ['Q9_1','Q9_2','Q9_3','Q9_4','Q16','Q17_1','Q17_2','Q17_3','Q17_4']){
+for(const col of ['Q9_1','Q9_2','Q9_3','Q9_4','Q9_5','Q16','Q17_1','Q17_2','Q17_3','Q17_4','Q17_5']){
  assert.equal(answersSheet.getRange(rowNum,columns.indexOf(col)+1).getValue(),0,'The unknown response must be saved as zero: '+col);
 }
 const aggregate=last.getSheetByName('集計').getDataRange().getValues().flat().map(String);
 assert(aggregate.some(x=>x.includes('AVERAGEIF(')&&x.includes('>0')),'unknown values must be excluded from average');
 console.log('UNKNOWN PASS: 0 preserved in all rating fields, averages exclude 0');
 
+
+const none=sample(0);none.Q5={list:['他人には預けたくない']};const noBorrow=trim(none);
+assert(!('Q11' in noBorrow)&&!('Q13a' in noBorrow),'no-peer-storage route should skip prices');
+assert.equal(submit({version:'2026.11-r11',requestId:'no-peer-123456789012345',answers:noBorrow}).ok,true);
+const uninterested=sample(1);uninterested.Q16=1;const lowL=trim(uninterested);
+assert(!('Q19' in lowL)&&!('Q21e' in lowL),'low-interest supply should skip detailed questions');
+assert.equal(submit({version:'2026.11-r11',requestId:'no-lend-123456789012345',answers:lowL}).ok,true);
+const delivery=sample(0);delivery.Q13a='宅配便で送る';assert(!('Q13b' in trim(delivery)),'delivery users skip self-carry distance');
+const bulky=sample(2);bulky.Q6='大型品が中心';bulky.Q14c='大型品向け';const bulk=trim(bulky);
+assert(!('Q11b' in bulk)&&!('Q19b' in bulk),'do not invent fixed price for bulky items');
+assert.equal(submit({version:'2026.11-r11',requestId:'bulky-storage-12345678901',answers:bulk}).ok,true);
+const priceCol=columns.indexOf('借り手_提示保管料月額')+1;
+assert.equal(last.getSheetByName('回答').getRange(2,priceCol).getValue(),1500);
+const totalCol=columns.indexOf('借り手_提示支払総月額')+1;
+assert.equal(last.getSheetByName('回答').getRange(2,totalCol).getValue(),1770);
+console.log('BRANCH/PRICE PASS: conditional forms and monthly amount persisted');
