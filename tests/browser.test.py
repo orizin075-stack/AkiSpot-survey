@@ -11,10 +11,10 @@ JS=r'''(role) => {
   const id=x.textContent;out.seen.push(id);
   if(document.documentElement.scrollWidth>innerWidth+2)out.overflows.push(id);
   if(id==='Q9'||id==='Q17'||id==='Q16'){
-   if(document.querySelectorAll('#main .rating-unknown').length!==(id==='Q16'?1:4))out.errors.push(id+': missing undecided choice');
+   if(document.querySelectorAll('#main .rating-unknown').length!==(id==='Q16'?1:5))out.errors.push(id+': missing undecided choice');
    const labels=[...document.querySelectorAll('#main .rating:not(.rating-unknown) .rating-text')].map(x=>x.textContent);
    const expected=id==='Q16'?['全く関心がない','あまり関心がない','どちらともいえない','やや関心がある','非常に関心がある']:['全く気にならない','あまり気にならない','どちらともいえない','やや気になる','非常に気になる'];
-   if(labels.length!==(id==='Q16'?5:20)||labels.some((x,i)=>x!==expected[i%5]))out.errors.push(id+': rating labels do not match');
+   if(labels.length!==(id==='Q16'?5:25)||labels.some((x,i)=>x!==expected[i%5]))out.errors.push(id+': rating labels do not match');
   }
   const main=document.querySelector('#main');
   const radios=[...main.querySelectorAll('input[type="radio"]')];
@@ -22,6 +22,7 @@ JS=r'''(role) => {
   const tx=main.querySelector('textarea');
   if(id==='Q4') radios[role].click();
   else if(id==='Q7')radios[2].click();
+  else if(id==='Q16')radios[3].click();
   else if(id==='Q10'||id==='Q18'){
    checks[0].click();checks[1].click();checks[2].click();checks[3].click();
    out.limited.push([id,checks.filter(c=>c.checked).length,checks[3].checked]);
@@ -51,6 +52,7 @@ with sync_playwright() as p:
    assert ('Q8' in result['seen'])==(role in (0,2))
    assert ('Q10' in result['seen'])==(role in (0,2))
    assert ('Q18' in result['seen'])==(role in (1,2))
+   assert ('Q19' in result['seen'])==(role in (1,2))
    assert all(x[1]==3 and x[2] is False for x in result['limited']),result
    assert not page.get_by_role('button',name='回答を送信する').count()
    if width==390 and role==2: page.screenshot(path=str(ROOT/'mobile-preview.png'))
@@ -67,7 +69,7 @@ with sync_playwright() as p:
  page.get_by_role('button',name='回答を送信する').click()
  data=page.evaluate('window.__posted')
  assert data and data['url'].endswith('/FAKE_DEPLOY_ID_12345/exec'),data
- assert data['method']=='post' and data['payload']['version']=='2026.10-r10'
+ assert data['method']=='post' and data['payload']['version']=='2026.11-r11'
  assert data['payload']['answers']['Q4']=='どちらも当てはまらない'
  assert 'Q25' in data['payload']['answers'] and not errs
  print('BROWSER PASS:',n,'viewport/route cases plus connected POST contract')
