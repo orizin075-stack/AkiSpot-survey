@@ -39,7 +39,9 @@ let uuid=0;const Utilities={getUuid(){return '12345678-abc'+(++uuid)+'-defg-hijk
 const HtmlService={createHtmlOutput(html){return {html,setTitle(){return this},addMetaTag(){return this}}}};
 const ctx={SpreadsheetApp,PropertiesService,LockService,Utilities,HtmlService,console};vm.createContext(ctx);vm.runInContext(s,ctx);
 const setup=vm.runInContext('setup_',ctx),submit=vm.runInContext('submitSurvey',ctx),build=vm.runInContext('buildFlags_',ctx),schema=vm.runInContext('QUESTION_SCHEMA',ctx);
+const legacy=new Book('legacy-r9');legacy.sheets[0].setName('回答');legacy.sheets[0].appendRow(['legacy sentinel']);ssmap.set(legacy.id,legacy);props.set('AKISPOT_R9_SHEET_ID',legacy.id);
 const url1=setup(); assert.equal(last.sheets.length,5); assert.equal(last.getSheetByName('ダッシュボード').getCharts().length,2);
+assert.notEqual(last.id,legacy.id);assert.equal(props.get('AKISPOT_R9_SHEET_ID'),legacy.id);assert.equal(props.get('AKISPOT_R11_SHEET_ID'),last.id);assert.deepEqual(legacy.sheets[0].cells,[['legacy sentinel']]);
 const url2=setup();assert.equal(url1,url2);assert.equal(last.sheets.length,5);
 const activeIds=vm.runInContext('activeIds_',ctx);
 function trim(a){const ids=new Set(activeIds(a));return Object.fromEntries(Object.entries(a).filter(([id])=>ids.has(id)))}
