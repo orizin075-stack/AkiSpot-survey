@@ -116,3 +116,9 @@ assert.equal(last.getSheetByName('回答').getRange(2,priceCol).getValue(),1500)
 const totalCol=columns.indexOf('借り手_提示支払総月額')+1;
 assert.equal(last.getSheetByName('回答').getRange(2,totalCol).getValue(),1770);
 console.log('BRANCH/PRICE PASS: conditional forms and monthly amount persisted');
+
+const cannotCarry=sample(0);cannotCarry.Q11b='この条件なら利用したい';cannotCarry.Q13='すでに探している';cannotCarry.Q13a='どの方法も難しい';
+assert.equal(build(cannotCarry)['借り手_有望候補'],0,'transport impossibility is not a strong prospect');
+cannotCarry.Q13a='まだ分からない';
+assert.equal(build(cannotCarry)['借り手_有望候補'],0,'unknown transport should not count as ready');
+console.log('FLAG PASS: impossible and unknown transport excluded from strong borrower leads');
