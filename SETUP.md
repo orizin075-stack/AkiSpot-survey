@@ -1,5 +1,22 @@
 # AkiSpot r11｜公開手順（Google → GitHub → 実機テスト）
 
+## 既存のAkiSpot環境を更新する場合（こちらを優先）
+すでに専用GitHubリポジトリとApps Scriptを作成したため、以下の既存環境を再利用します。**新しいプロジェクトを作成する必要はありません。**
+
+- [既存Apps Scriptエディター](https://script.google.com/d/1R6GnQAdZafeNm246KYV4fBs00w8yfV_0Nwe5ApuUvmTedkXWBJVs70K_/edit)
+- [GitHub：バックエンド Code.gs](https://github.com/orizin075-stack/AkiSpot-survey/blob/main/backend/Code.gs)
+- [GitHub：バックエンド Index.html](https://github.com/orizin075-stack/AkiSpot-survey/blob/main/backend/Index.html)
+- [既存回答管理スプレッドシート](https://docs.google.com/spreadsheets/d/13clEYURa5czTrYIFG3NYDHued2c_T3Kzj9xotJ9GCj0/edit)
+- [GitHub：送信先 config.js](https://github.com/orizin075-stack/AkiSpot-survey/blob/main/config.js)
+- [公開ページ](https://orizin075-stack.github.io/AkiSpot-survey/)
+
+手順：①既存エディターの `Code.gs` と `Index.html` を上記GitHubの最新版 **r11** に置換して保存 → ②`setup_` を1回実行して既存回答シートの列・集計を更新（回答を消さない） → ③`デプロイを管理` で既存ウェブアプリを編集、`新しいバージョン` を選び再デプロイ → ④発行済みの `https://script.google.com/macros/s/.../exec` URLを `config.js` に設定 → ⑤公開ページから試験送信してGoogleの受付番号と管理シートへの1行保存を確認。
+
+**注意**：上記Apps Scriptリンクは編集画面で、公開回答用の `/exec` リンクではありません。公開URLを編集画面のURLで代用しないでください。Google Apps Scriptの編集・デプロイ・Googleアカウント認証はGitHubへのコミットだけでは実行されません。 `config.js` が空の場合は試用モードのままです。
+
+**既存回答シートの実測状態（2026年11月1日時点）**：r9列構成（55列）、回答数0件。r11コード実行時に新しい列が追加される設計ですが、まだ反映・実送信の確認はできていません。
+
+
 ## 1. Google Apps Scriptで回答保存先を作る
 
 1. [Google Apps Script](https://script.google.com/) で「新しいプロジェクト」を開き、例えば `AkiSpot Survey r11` と名付けます。
