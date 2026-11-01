@@ -5,7 +5,7 @@ const gas=fs.readFileSync(path.join(base,'backend/Index.html'),'utf8');
 const backend=fs.readFileSync(path.join(base,'backend/Code.gs'),'utf8');
 const config=fs.readFileSync(path.join(base,'config.js'),'utf8');
 assert.match(website,/<meta name="viewport"/);
-assert.match(website,/<script src="config\.js"><\/script>/);
+assert.match(website,/<script src="config\.js\?v=r11-20261101"><\/script>/);
 assert.match(website,/function submitViaPost_\(\)/);
 assert.match(website,/form\.method='POST'/);
 assert.match(website,/form\.submit\(\)/);
