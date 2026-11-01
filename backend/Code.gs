@@ -109,7 +109,7 @@ function buildFlags_(a) {
   return {
     '借り手フラグ':+(b),'貸し手フラグ':+(l),
     '借り手_価格前向き':+(bPrice),'借り手_価格明確':+(bStrong),
-    '借り手_3か月探索':+(bSoon),'借り手_有望候補':+(bStrong&&bSoon&&a.Q13a!=='どの方法も難しい・分からない'&&a.Q6a!=='まだ分からない'),
+    '借り手_3か月探索':+(bSoon),'借り手_有望候補':+(bStrong&&bSoon&&a.Q13a!==undefined&&a.Q13a!=='どの方法も難しい'&&a.Q13a!=='まだ分からない'&&a.Q6a!=='まだ分からない'),
     '貸し手_価格前向き':+(lPrice),'貸し手_価格明確':+(lStrong),
     '貸し手_3か月受入準備':+(lSoon),'貸し手_本人判断で使用可':+(lOwn),
     '貸し手_有望候補':+(lStrong&&lOwn&&a.Q21d==='すでに受け入れの準備ができている'&&lArea&&lTransfer&&lDuration&&!lExclude),
