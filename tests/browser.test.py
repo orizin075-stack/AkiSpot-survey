@@ -60,7 +60,7 @@ with sync_playwright() as p:
    if width==390 and role==2: page.screenshot(path=str(ROOT/'mobile-preview.png'))
    page.close();n+=1
  # Configured GitHub Pages flow: intercept native HTML form POST, prove payload + URI correct.
- live=HTML.replace('<script src="config.js"></script>',"<script>window.AKISPOT_SUBMISSION_URL='https://script.google.com/macros/s/FAKE_DEPLOY_ID_12345/exec';</script>")
+ live=HTML.replace('<script src="config.js?v=r11-20261101"></script>',"<script>window.AKISPOT_SUBMISSION_URL='https://script.google.com/macros/s/FAKE_DEPLOY_ID_12345/exec';</script>")
  page=browser.new_page(viewport={'width':390,'height':844})
  errs=[];page.on('pageerror',lambda e:errs.append(str(e)))
  page.set_content(live)
