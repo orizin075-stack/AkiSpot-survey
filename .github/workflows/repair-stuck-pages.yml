@@ -1,0 +1,32 @@
+name: Repair stuck GitHub Pages deployment
+on:
+  push:
+    paths:
+      - '.github/workflows/repair-stuck-pages.yml'
+  workflow_dispatch:
+permissions:
+  pages: write
+jobs:
+  cancel-stuck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Cancel orphaned Pages deployment blocking new releases
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commit = 'bc125a4faaa0b2bc9056788317f8971975555e97';
+            try {
+              await github.request('POST /repos/{owner}/{repo}/pages/deployments/{pages_deployment_id}/cancel', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pages_deployment_id: commit
+              });
+              core.info('Cancellation accepted for stuck Pages deployment ' + commit);
+            } catch (error) {
+              if (error.status === 404) {
+                core.info('Stuck deployment already absent; no cancellation needed.');
+              } else {
+                throw error;
+              }
+            }
