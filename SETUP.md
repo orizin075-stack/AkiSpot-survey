@@ -6,15 +6,15 @@
 - [既存Apps Scriptエディター](https://script.google.com/d/1R6GnQAdZafeNm246KYV4fBs00w8yfV_0Nwe5ApuUvmTedkXWBJVs70K_/edit)
 - [GitHub：バックエンド Code.gs](https://github.com/orizin075-stack/AkiSpot-survey/blob/main/backend/Code.gs)
 - [GitHub：バックエンド Index.html](https://github.com/orizin075-stack/AkiSpot-survey/blob/main/backend/Index.html)
-- [既存回答管理スプレッドシート](https://docs.google.com/spreadsheets/d/13clEYURa5czTrYIFG3NYDHued2c_T3Kzj9xotJ9GCj0/edit)
+- [旧r9の回答管理スプレッドシート（r11とは別）](https://docs.google.com/spreadsheets/d/13clEYURa5czTrYIFG3NYDHued2c_T3Kzj9xotJ9GCj0/edit)
 - [GitHub：送信先 config.js](https://github.com/orizin075-stack/AkiSpot-survey/blob/main/config.js)
 - [公開ページ](https://orizin075-stack.github.io/AkiSpot-survey/)
 
-手順：①既存エディターの `Code.gs` と `Index.html` を上記GitHubの最新版 **r11** に置換して保存 → ②`setup_` を1回実行して既存回答シートの列・集計を更新（回答を消さない） → ③`デプロイを管理` で既存ウェブアプリを編集、`新しいバージョン` を選び再デプロイ → ④発行済みの `https://script.google.com/macros/s/.../exec` URLを `config.js` に設定 → ⑤公開ページから試験送信してGoogleの受付番号と管理シートへの1行保存を確認。
+手順：①既存エディターの `Code.gs` と `Index.html` を上記GitHubの最新版 **r11** に置換して保存 → ②下記の一時関数を実行してr11専用の新しい回答・集計シートを作成し、ログのURLを控える（r9シートには書き込まない） → ③ウェブアプリをデプロイ。既存のデプロイがある場合は `デプロイを管理` から新しいバージョンを発行する → ④発行された `https://script.google.com/macros/s/.../exec` URLを `config.js` に設定 → ⑤公開ページから試験送信してGoogleの受付番号とr11管理シートへの1行保存を確認。
 
 **注意**：上記Apps Scriptリンクは編集画面で、公開回答用の `/exec` リンクではありません。公開URLを編集画面のURLで代用しないでください。Google Apps Scriptの編集・デプロイ・Googleアカウント認証はGitHubへのコミットだけでは実行されません。 `config.js` が空の場合は試用モードのままです。
 
-**既存回答シートの実測状態（2026年11月1日時点）**：r9列構成（55列）、回答数0件。r11コード実行時に新しい列が追加される設計ですが、まだ反映・実送信の確認はできていません。
+**旧r9シートの確認時の状態（2026年11月1日時点）**：55列、回答数0件。r11は旧r9と別のスプレッドシートを作成します。Apps Scriptへの反映・実送信はまだ確認できていません。
 
 
 ## 1. Google Apps Scriptで回答保存先を作る
@@ -22,7 +22,7 @@
 1. [Google Apps Script](https://script.google.com/) で「新しいプロジェクト」を開き、例えば `AkiSpot Survey r11` と名付けます。
 2. 自動生成される `コード.gs` の中身をすべて置換し、`backend/Code.gs` の全文を貼り付けて保存します。
 3. `＋` → `HTML` で **ファイル名 `Index`** を作り、`backend/Index.html` の全文を貼り付けます。先頭の `<!doctype html>` から末尾までをそのまま使用してください。
-4. 関数選択から `setup_` を選んで「実行」をクリックし、スプレッドシート作成・編集の権限を承認します。実行ログに回答シートのURLが表示されます。
+4. `Code.gs` の末尾に一時的に `function initializeAkiSpot() { return setup_(); }` を追加して保存し、関数選択で `initializeAkiSpot` を選んで「実行」をクリックします。スプレッドシート作成・編集の権限を承認し、実行ログのr11回答シートURLを控えます。完了後は一時関数を削除して保存します。
 5. そのシートはGoogleドライブ上に **「AkiSpot アンケート回答・集計（r11）」** として作成されます。「回答」「ダッシュボード」「集計」「設問定義」「管理・注意」のタブを確認してください。
 6. **シートの共有は「制限付き」にして、回答者に共有しない**でください。回答者は回答用Webアプリにアクセスするだけで、管理シートを見る必要はありません。
 
@@ -99,6 +99,6 @@ Googleフォームで作成した以前の別アンケートには、回答は�
 
 公開Apps ScriptのURLには誰でもリクエストできます。**CAPTCHAや厳密ななりすまし検出は未実装**で、GitHub Pages自体も回答の認証をしていません。配布範囲を適切に設定し、不審な大量回答があれば受付停止・調査データから除外してください。アクセス元IP等を本システムで記録していないため、回答者を完全に一意識別することはできません。
 
-**r11への変更時**：既存Apps Scriptで`setup_()`を再実行すると、既存の回答を消さずに新しい列と集計式を追加します。新規設定した場合は新しいシートを作ります。旧版回答は調査版で区別してください。
+**r11への変更時**：r11は専用の保存先キーを使い、最初の初期設定で新しいシートを作成します。旧r9シートはそのまま残ります。r11の初期設定を再実行した場合は同じr11シートを使います。
 
-**r11への更新**：Apps Scriptに `backend/Code.gs` と `backend/Index.html` の両方を反映し、`setup_()`を実行して列を追加してください。Webアプリを新バージョンで再デプロイし、実際にテスト回答が保存できるか検証してください。過去の調査版と異なる料金条件なので、回答を合算する場合は調査版と提示価格で区別してください。
+**r11への更新**：Apps Scriptに `backend/Code.gs` と `backend/Index.html` の両方を反映し、初期設定を実行してr11専用シートを作成してください。Webアプリをデプロイし、実際にテスト回答が保存できるか検証してください。過去の調査版と異なる料金条件なので、回答を比較する場合は調査版と提示価格を区別してください。
